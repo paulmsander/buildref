@@ -1,0 +1,268 @@
+.TH paths 1
+.SH NAME
+paths \- Compute fullpaths and options based on build references.
+.SH SYNOPSIS
+.B paths
+.RB [ -a ]
+.RB [ -d ]
+[
+.BI -p prefix
+] [
+.BI -s suffix
+] [
+.BI -S separator
+]
+.I bldref
+.I class
+[
+.IR path ...
+]
+.br
+.B paths
+.RB [ -a ]
+.RB [ -d ]
+[
+.BI -p prefix
+] [
+.BI -s suffix
+] [
+.BI -S separator
+]
+.B -b
+.IR build ...
+.I class
+[
+.IR path ...
+]
+.br
+.B paths -l
+.I bldref
+.br
+.B paths -l
+.B -b
+.IR build ...
+.br
+.B paths -h
+.SH DESCRIPTION
+.LP
+The
+.B paths
+program is used to search build references for specific files and directories.
+It's typically used by the build processes to compute
+.B -I
+options for the compiler, and to compute certain dependencies.
+.LP
+The
+.I bldref
+argument specifies the name of a build reference file, usually named
+.B .bldref
+and located in the root of a development area, which lists all of the
+builds that may contain missing pieces for a product undergoing development.
+Each build is listed once, by the fullpath to its root directory.
+This file is edited by the user, using the
+.B bldref
+program.  Here is a sample file:
+.RS 0.5i
+.LP
+/pulsar/a/build/weekly/latest
+.RE
+.LP
+The
+.BI -b build
+arguments provide a means to list builds on the command line rather than
+in a
+.B .bldref
+file.
+This is useful for scripts in which builds are named as parameters, e.g.
+regression suites.
+.LP
+Each build contains a file, located at
+.B .bldstate/search
+relative to its root directory.
+This file lists directories within the build and the class of file that
+can be found there.  For example:
+.RS 0.5i
+.LP
+include project/include/cpp
+.br
+idl project/include/idl
+.br
+idl project/include/cpp
+.br
+lib project/lib
+.br
+lib project/utils/lib
+.RE
+.LP
+This indicates that C and C++ header files can be found in the
+project/include/cpp
+directory relative to the build's root.
+IDL header files can be found in
+project/include/idl
+and
+project/include/cpp.
+Libraries used by the linker are found in
+project/lib.
+.LP
+In the absence of other command line arguments, the
+.B paths
+program writes the fullpaths of all of the directories matching the
+given search class in all of the referenced builds to the standard
+output file.
+.LP
+If the
+.B -l
+option is given, the search classes that are available in the referenced
+builds are listed to the stdout stream in sort order.
+.LP
+If one or more
+.I path
+arguments are given, they are appended each directory matching the
+given search class to form a search path.
+Normally, the first path that points to an existing file or directory
+is written to the standard output file.  All paths that point to existing
+files are written if the
+.B -a
+option is given.  For example, expanding on the examples given above,
+suppose that the file foo.h exists in the project/include/cpp and
+project/include/idl directories.  Then the command:
+.RS 0.5i
+.LP
+.B paths
+.I .bldref
+.B idl foo.h
+.RE
+.LP
+gives this result:
+.RS 0.5i
+.LP
+/pulsar/a/build/weekly/latest/project/include/idl/foo.h
+.RE
+.LP
+while this command:
+.RS 0.5i
+.LP
+.B paths -a
+.I bldref
+.B idl foo.h
+.RE
+.LP
+gives this result:
+.RS 0.5i
+.LP
+/pulsar/a/build/weekly/latest/project/include/idl/foo.h
+.br
+/pulsar/a/build/weekly/latest/project/include/cpp/foo.h
+.RE
+.LP
+The output of the search algorithm can be edited by adding prefixes,
+suffixes, or separator, using the
+.BR -p ,
+.BR -s ,
+or
+.B -S
+options, respectively.  Compiler search options can be computed by
+giving this command:
+.RS 0.5i
+.LP
+.B paths -p-I
+.I bldref
+.B include
+.RE
+.LP
+yields this output:
+.RS 0.5i
+.LP
+-I/pulsar/a/build/weekly/latest/project/include/cpp
+.RE
+.LP
+Library or binary search paths suitable for assignment to environment
+variables can be computed by giving this command:
+.RS 0.5i
+.LP
+.B paths -S:
+.I bldref
+.B lib
+.RE
+.LP
+yields this output:
+.RS 0.5i
+.LP
+/pulsar/a/build/weekly/latest/project/lib:/pulsar/a/build/weekly/latest/project/utils/lib
+.RE
+.LP
+It is important to note that the prefix and suffix strings still have
+their usual effect when the separator is specified.
+They will add prefixes and suffixes to every path in the output.
+.LP
+Output is normally written to the standard output file.
+The exit status is normally 0.
+Warning conditions where errors are detected but execution continues
+are diagnosed by writing messages to the standard error file, and exiting
+with a 1 status.
+Errors that cause the
+.B paths
+program to terminate early are diagnosed by writing messages to the
+standard error file, and exiting with a 2 status.
+.LP
+Error messages are read from an XPG3 message catalog.  To read them, the
+.B NLSPATH
+environment variable must be set appropriately.
+Error messages fall in the
+.B C
+locale, so the
+.B LANG
+environment variable should also be set accordingly.
+.SH OPTIONS
+.TP 1i
+.B -a
+Displays all fullpaths for each matching
+.I path
+argument.
+.TP 1i
+.BI -b build
+Declares a build reference on the command line, rather than using a
+.I bldref
+file.  May be repeated, and builds are searched in the order given.
+.TP 1i
+.B -d
+Displays debugging information to the standard error file.
+.TP 1i
+.B -h
+Displays a usage message.
+.TP 1i
+.B -l
+Displays a list of all search classes available from the referenced builds
+in sort order.
+.TP 1i
+.BI -p prefix
+Prepends
+.I prefix
+to each fullpath written to the standard output file.
+.TP 1i
+.BI -s suffix
+Appends
+.I suffix
+to each fullpath written to the standard output file.
+.TP 1i
+.BI -S separator
+Separates the paths written to the stdout stream with the
+.I separator
+string.
+The
+.I separator
+string defaults to the newline string.
+.SH FILES
+.TP 1i
+paths.msg
+Error messages.
+.TP 1i
+.I bldref
+Given on the command line, this file lists build references.
+.IP .bldstate/search 1i
+Relative to the root directory of a build area, this file specifies how
+the build area is searched for various types of files.
+.SH SEE ALSO
+bldref(1),
+catopen(3c)
+

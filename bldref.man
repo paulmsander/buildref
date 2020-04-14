@@ -1,0 +1,174 @@
+.TH bldref 1
+.SH NAME
+bldref \- Maintain build reference list.
+.SH SYNOPSIS
+.B bldref
+[
+.B -a
+] [
+.B -A
+] [
+.B -c
+] [
+.BI -d directory
+] [
+.B -l
+] [
+.B -r
+] [
+.B -X
+] [
+.I build...
+]
+.br
+.B bldref -h
+.SH DESCRIPTION
+.LP
+The
+.B bldref
+program maintains a list of references to baseline builds that are used by
+build processes (e.g. Makefiles) tell compilers and linkers where to locate
+interesting files that may not be present in a build or development area.
+Build references can be added or removed from the list, and the list can
+be reviewed.
+.LP
+To create one or more build references, set your present working directory
+to be the root of your build area.
+Then invoke the
+.B bldref
+program and list the root directories of any interesting builds on the
+command line, in the order in which they are searched.
+.LP
+Indirect references (i.e. build references located in the builds)
+can be added to the build reference list as an option
+\fR(\fB-A\fR).
+This transitive closure property ensures that all of the files needed to
+complete a build in the development area are available via the build
+reference mechanism.
+.LP
+The
+.B -l
+option lists existing build references to the standard output file.  The
+.B -c
+option clears all existing build references.  The
+.B -r
+option specifies that the build references listed on the command line
+are removed.
+.LP
+If build references already exist, then new build references can be
+added to the beginning of the list by invoking the
+.B bldref
+program normally.
+Supplying the
+.B -a
+option adds the given build references to the end of the build reference
+list.
+.LP
+The
+.B -h
+option displays a usage message.  The
+.B -X
+option displays debugging data.
+.LP
+The buildref list is written to a file named
+.BR .bldref .
+(If a
+.B Makefile
+exists in the present working directory, its
+.B .top
+target is used to locate the build reference list.  If no
+.B Makefile
+is present, the present working directory is assumed.)
+The
+.B -d
+option specifies the location of the
+.B .bldref
+file explicitly.
+.LP
+Other output is normally written to the standard output file.
+The exit status is normally 0.
+Warning conditions where errors are detected but execution continues are
+diagnosed by writing messages to the standard error file, and exiting with
+a 1 status.
+Errors that cause the
+.B bldref
+program to terminate early are diagnosed by writing messages to the
+standard error file, and exiting with a 2 status.
+.LP
+Error messages are read from an XPG3 message catalog.
+To read them, the
+.B NLSPATH
+environment variable must be properly configured.
+Error messages fall in the
+.B C
+locale, so the
+.B LANG
+environment variable should be set accordingly.
+.SH OPTIONS
+.TP 1i
+.B -a
+Causes the given build references to be added to the end of the build
+reference list, rather than to the beginning.
+.TP 1i
+.B -A
+Copies references from builds listed on the command line into the build
+reference list.
+.TP 1i
+.B -c
+Clears all build references, leaving an empty build reference list.
+.TP 1i
+.BI -d directory
+Specifies the root directory of the development area where build references
+exist.  The default value for this is given in a Makefile located in the
+present working directory, written to stdout by the
+.B .top
+target.
+In the absence of a
+.BR Makefile ,
+the default becomes the present working directory.
+.TP 1i
+.B -h
+Displays a usage message.
+.TP 1i
+.B -l
+Lists existing build references to the standard output file.
+.TP 1i
+.B -r
+Causes the specified
+.IR build s
+to be removed from the build reference list.
+.TP 1i
+.B -X
+Displays debugging information to the standard error file.
+.TP 1i
+.I build
+Specifies the fullpath to a build that is to be added to (by default or with
+the
+.B -a
+option) or removed from (with the
+.B -r
+option) the build reference list.
+.SH FILES
+.TP 1i
+ .bldref
+Text file containing the list of build references.
+.TP 1i
+ .bldref.old
+Text file containing the list of build references that existed before the
+last invocation of the
+.B bldref
+program.
+.SH SEE ALSO
+make(1),
+paths(1),
+catopen(3c)
+.SH BUGS
+.LP
+There is no checking for overlap in the builds that are referenced.  This
+can lead to very subtle version mismatch bugs in the result of the build
+if the build reference list contains references to builds that contain
+different versions of the same software.
+.LP
+Indirect references introduce some complexity to the build reference
+mechanism, which may lead to unpredictable search paths when overlapping
+builds are involved.
