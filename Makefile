@@ -10,13 +10,12 @@ LIBS = -lchipset
 INSTBASE = /usr/local
 INSTBIN = $(INSTBASE)/bin
 INSTLIB = $(INSTBASE)/lib
+INSTSHARE = $(INSTBASE)/share
 LOCALE = C
-INSTMSG = $(INSTLIB)/locale/$(LOCALE)/LC_MESSAGES
+INSTMSG = $(INSTSHARE)/locale/$(LOCALE)/LC_MESSAGES
 MANSECT = 1
-INSTMAN = $(INSTBASE)/man/man$(MANSECT)
+INSTMAN = $(INSTSHARE)/man/man$(MANSECT)
 #INSTMAN = /usr/catman/l_man/man$(MANSECT)
-
-CC = gcc -ansi -pedantic
 
 # Default rules
 .SUFFIXES: .m4 .msg .xpg .$(MANSECT) .man
@@ -55,26 +54,32 @@ install: $(INSTBIN)/bldref $(INSTMSG)/bldref.msg $(INSTMAN)/bldref.$(MANSECT)
 install: $(INSTBIN)/paths $(INSTMSG)/paths.msg $(INSTMAN)/paths.$(MANSECT)
 
 $(INSTMSG)/bldref.msg: bldref.msg
+	mkdir -p $(@D)
 	cp bldref.msg $@
 	chmod 644 $@
 
 $(INSTMSG)/paths.msg: paths.msg
+	mkdir -p $(@D)
 	cp paths.msg $@
 	chmod 644 $@
 
 $(INSTBIN)/bldref: bldref
+	mkdir -p $(@D)
 	cp bldref $@
 	chmod 755 $@
 
 $(INSTBIN)/paths: paths
+	mkdir -p $(@D)
 	cp paths $@
 	chmod 755 $@
 
 $(INSTMAN)/bldref.$(MANSECT): bldref.$(MANSECT)
+	mkdir -p $(@D)
 	cp bldref.$(MANSECT) $@
 	chmod 644 $@
 
 $(INSTMAN)/paths.$(MANSECT): paths.$(MANSECT)
+	mkdir -p $(@D)
 	cp paths.$(MANSECT) $@
 	chmod 644 $@
 

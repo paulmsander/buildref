@@ -1,6 +1,7 @@
 #include <sys/param.h>
 #include <stdio.h>
 #ifdef __STDC__
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #else
@@ -532,9 +533,9 @@ int		nest;
  *****************************************************************/
 
 #ifdef __STDC__
-main(int argc, char **argv)
+int main(int argc, char **argv)
 #else
-main(argc,argv)
+int main(argc,argv)
 int		argc;
 char	**argv;
 #endif
